@@ -1,39 +1,40 @@
 import React, { useState } from "react";
-import HogList from "./components/HogList";
-import FilterBar from "./components/FilterBar";
-import AddHogForm from "./components/AddHogForm";
-import hogsData from "./porkers_data";
+import Nav from "../src/components/NavBar";
+import Filter from "./components/Filter";
+import HogList from "../src/components/HogList";
+
+import hogs from "../src/porkers_data";
 
 function App() {
-  const [hogs, setHogs] = useState(hogsData);
-  const [greasedOnly, setGreasedOnly] = useState(false);
+  const [showGreased, setShowGreased] = useState(false);
   const [sortBy, setSortBy] = useState("name");
-  const [hiddenHogs, setHiddenHogs] = useState([]);
 
-  const toggleGreased = () => setGreasedOnly(!greasedOnly);
-
-  const sortedAndFilteredHogs = hogs
-    .filter(hog => (greasedOnly ? hog.greased : true))
-    .sort((a, b) =>
-      sortBy === "name" ? a.name.localeCompare(b.name) : a.weight - b.weight
-    )
-    .filter(hog => !hiddenHogs.includes(hog.name));
-
-  const addNewHog = (newHog) => setHogs([...hogs, newHog]);
-
-  const hideHog = (hogName) => setHiddenHogs([...hiddenHogs, hogName]);
+  const hogsToDisplay = hogs
+    .filter((hog) => (showGreased ? hog.greased : true))
+    .sort((hog1, hog2) => {
+      if (sortBy === "weight") {
+        return hog1.weight - hog2.weight;
+      } else {
+        return hog1.name.localeCompare(hog2.name);
+      }
+    });
 
   return (
-    <div className="App bg-dark">
-      <h1>Hog Farm</h1>
-      <FilterBar 
-        greasedOnly={greasedOnly} 
-        toggleGreased={toggleGreased} 
-        sortBy={sortBy} 
-        setSortBy={setSortBy} 
-      />
-      <AddHogForm addNewHog={addNewHog} />
-      <HogList hogs={sortedAndFilteredHogs} hideHog={hideHog} />
+    <div className="ui grid container App">
+      <div className="sixteen wide column centered">
+        <Nav />
+      </div>
+      <div className="sixteen wide column centered">
+        <Filter
+          showGreased={showGreased}
+          onChangeShowGreased={setShowGreased}
+          sortBy={sortBy}
+          onChangeSortBy={setSortBy}
+        />
+      </div>
+      <div className="sixteen wide column centered">
+        <HogList hogs={hogsToDisplay} />
+      </div>
     </div>
   );
 }
